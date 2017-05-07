@@ -9,15 +9,47 @@
             padding: 0;
             background-color: #000;
         }
+        h1 {color: white;}
+        h2 {color: white;}
+        h3 {color: white;}
     </style>
 	<audio   autoplay loop> 
 		<source src="assets/mySong.mp3" type="audio/mpeg">
 	</audio>
+
+	<audio id="fuelSound"> 
+		<source src="assets/fuelSound2.wav" type="audio/mpeg">
+	</audio>
+	
     <script src="//cdn.jsdelivr.net/phaser/2.2.2/phaser.min.js"></script>
 </head>
 <body>
-   	
+
+	<h1 align="center">Semester Project</h1>
+	<h2 align="center">Spyridon Georg Koustas (Π2014027)</h2>
+	<h3 id="scoreTxt" align="center"></h3>
+	<h3 id="fuelnLivesTxt" align="center"></h3>
+
     <script type="text/javascript">
+
+    var score = 0;
+    var bestScore = 0;
+
+    var lives = 3;
+    var fuel = 100;
+
+    var chance;
+    var showStar = false;
+
+    function show_star() 
+    {
+    	var star_sprite = game.add.sprite(250, 180, 'star');
+    }
+
+    function kill_star(sprite_name)
+    {
+    	game.world.remove(sprite_name);
+    }
 
     var game = new Phaser.Game(448, 496, Phaser.AUTO);
 
@@ -66,7 +98,8 @@
             //this.load.crossOrigin = 'anonymous';
 
             this.load.image('dot', 'assets/dot.png');
-			this.load.image('petrol', 'assets/petrol.png');
+			this.load.image('petrol', 'assets/petrol.png');	
+			this.load.image('star', 'assets/star.png');
             this.load.image('tiles', 'assets/pacman-tiles.png');
             this.load.spritesheet('pacman', 'assets/pacman.png', 32, 32);
             this.load.tilemap('map', 'assets/pacman-map.json', null, Phaser.Tilemap.TILED_JSON);
@@ -87,13 +120,14 @@
 
             this.map.createFromTiles(7, this.safetile, 'dot', this.layer, this.dots);
 			this.map.createFromTiles(35, this.safetile, 'petrol', this.layer, this.petrols);
+			this.map.createFromTiles(36, this.safetile, 'star', this.layer, this.star);
 
             //  The dots will need to be offset by 6px to put them back in the middle of the grid
             this.dots.setAll('x', 6, false, false, 1);
             this.dots.setAll('y', 6, false, false, 1);
 			this.petrols.setAll('x', 0, false, false, 1);
             this.petrols.setAll('y', 0, false, false, 1);
-
+            
             //  Pacman should collide with everything except the safe tile
             this.map.setCollisionByExclusion([this.safetile], true, this.layer);
 
@@ -230,22 +264,96 @@
 
             dot.kill();
 
+            chance = Math.floor((Math.random() * 100) + 1);
+
+            if(chance < 90)
+            {
+            	setTimeout(function()
+            	{
+					//myStar = game.add.sprite(250, 180, 'star');
+					dot.revive();   	
+            		setTimeout(function()
+            		{
+            			//myStar.kill();
+            			dot.kill();
+            		}, 4000);
+            	}, 5000);            	
+            } 
+           
+            score = score + 1;
+            fuel = fuel - 1;
+
+            document.getElementById("scoreTxt").innerHTML ="Score: " + score;
+            document.getElementById("fuelnLivesTxt").innerHTML ="Fuel: " + fuel + " - " + " Remaining Lives: " + lives;
+
+            if (fuel == 0)
+            {
+            	if(lives > 1)
+            	{
+            		lives = lives - 1;
+            		score = 0;
+            		fuel = 100;
+            		alert("Caution, you have lost 1 live!");
+            		this.dots.callAll('revive');
+            		this.petrols.callAll('revive');
+            	}
+            	else
+            	{            		
+            		lives = 3;
+            		score = 0;
+            		fuel = 100;
+            		alert("You lost the game!");
+            		this.dots.callAll('revive');
+            		this.petrols.callAll('revive');
+            	}
+            	
+            }
+
             if (this.dots.total === 0)
             {
+            	alert("Congratulations, you are the winner!");
+            	alert("Your score is: " + score);
                 this.dots.callAll('revive');
+                this.petrols.callAll('revive');
+
+                score = 0;
+                fuel = 100;
+
+                if (bestScore < score)
+                {
+                	bestScore = score;
+                }
             }
 
         },
-		
+
 		 eatPetrol: function (pacman, petrol) {
 
             petrol.kill();
+			var sound = document.getElementById("fuelSound");
+          	sound.play();
 
-            if (this.petrols.total === 0)
+            if(fuel <= 75)
             {
-                this.petrols.callAll('revive');
+            	fuel = fuel + 25;
+            }
+            else
+            {
+            	fuel = 100;
             }
 
+            //if (this.petrols.total === 0)
+            //{
+            //    this.petrols.callAll('revive');
+            //}
+
+        },
+
+        eatStar: function (pacman, star) {
+
+            star.kill();
+			var sound = document.getElementById("fuelSound");
+          	sound.play();
         },
 
         update: function () {
@@ -254,6 +362,8 @@
             this.physics.arcade.overlap(this.pacman, this.dots, this.eatDot, null, this);
 			
 			this.physics.arcade.overlap(this.pacman, this.petrols, this.eatPetrol, null, this);
+
+			this.physics.arcade.overlap(this.pacman, this.star, this.eatStar, null, this);
 
             this.marker.x = this.math.snapToFloor(Math.floor(this.pacman.x), this.gridsize) / this.gridsize;
             this.marker.y = this.math.snapToFloor(Math.floor(this.pacman.y), this.gridsize) / this.gridsize;
