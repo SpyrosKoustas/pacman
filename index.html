@@ -29,8 +29,11 @@
     <h2 align="center">Spyridon Georg Koustas (Π2014027)</h2>
     <h3 id="scoreTxt" align="center"></h3>
     <h3 id="fuelnLivesTxt" align="center"></h3>
+    <h3 id="time" align="center"></h3>
 
     <script type="text/javascript">
+
+    var time = 0;
 
     var score = 0;
     var bestScore = 0;
@@ -189,6 +192,9 @@
             this.physics.arcade.enable(this.teleport2);
             this.teleport2.body.setSize(16, 16, 0, 0);
             //---------------------------------------------------------------------
+
+            time = Math.floor(this.game.time.totalElapsedSeconds());
+            document.getElementById("time").innerHTML ="Time: " + time + " seconds";
 
             setTimeout(function()
                     {
@@ -364,6 +370,7 @@
                     alert("You lost the game!");
                     this.dots.callAll('revive');
                     this.petrols.callAll('revive');
+                    time = 0;
                 }
                 
             }
@@ -371,7 +378,7 @@
             if (this.dots.total === 0)
             {
                 alert("Congratulations, you are the winner!");
-                alert("Your score is: " + score);
+                alert("Your score is: " + score + " and your time is " + time + " seconds");
                 this.dots.callAll('revive');
                 this.petrols.callAll('revive');
 
@@ -410,7 +417,7 @@
         },
         
         update: function () {
-        	
+
         	if (this.physics.arcade.collide(this.pacman, this.enemy) || this.physics.arcade.collide(this.pacman, this.enemy2))
         	{
         		if(lives > 1)
@@ -419,8 +426,8 @@
                     score = 0;
                     fuel = 100;
                     alert("Caution, you have lost 1 live!");
-                    this.dots.callAll('revive');
-                    this.petrols.callAll('revive');
+                    //this.dots.callAll('revive');
+                    //this.petrols.callAll('revive');
 
                     this.pacman.position.x = (14 * 16) + 8;
                     this.pacman.position.y = (17 * 16) + 8;
@@ -433,12 +440,12 @@
                     this.enemy2.position.x = (14 * 16) + 8;
                     this.enemy2.position.y = (7 * 16) + 8;
 
-                    this.teleport1.body.velocity.x = 0;
-                    this.teleport1.position.x = (1 * 16) + 8;
-                    this.teleport1.position.y = (14 * 16) + 8;
-                    this.teleport2.body.velocity.x = 0;
-                    this.teleport2.position.x = (26 * 16) + 8;
-                    this.teleport2.position.y = (14 * 16) + 8;
+                    // this.teleport1.body.velocity.x = 0;
+                    // this.teleport1.position.x = (1 * 16) + 8;
+                    // this.teleport1.position.y = (14 * 16) + 8;
+                    // this.teleport2.body.velocity.x = 0;
+                    // this.teleport2.position.x = (26 * 16) + 8;
+                    // this.teleport2.position.y = (14 * 16) + 8;
                 }
                 else
                 {                   
@@ -446,6 +453,7 @@
                     score = 0;
                     fuel = 100;
                     alert("You lost the game!");
+                    time = 0;
                     this.dots.callAll('revive');
                     this.petrols.callAll('revive');
 
@@ -454,11 +462,18 @@
 
             		this.move(Phaser.LEFT);
 
-            		this.enemy.position.x = (1 * 16) + 8;
-                    this.enemy.position.y = (14 * 16) + 8;
+            		this.enemy.position.x = (14 * 16) + 8;
+                    this.enemy.position.y = (23 * 16) + 8;
 
-                    this.enemy2.position.x = (26* 16) + 8;
-                    this.enemy2.position.y = (14 * 16) + 8;
+                    this.enemy2.position.x = (14* 16) + 8;
+                    this.enemy2.position.y = (7 * 16) + 8;
+
+                    this.teleport1.body.velocity.x = 0;
+                    this.teleport1.position.x = (1 * 16) + 8;
+                    this.teleport1.position.y = (14 * 16) + 8;
+                    this.teleport2.body.velocity.x = 0;
+                    this.teleport2.position.x = (26 * 16) + 8;
+                    this.teleport2.position.y = (14 * 16) + 8;
                 }
         	}
 
@@ -565,8 +580,10 @@
                 this.turn();
             }
 
-        }
+            time = Math.floor(this.game.time.totalElapsedSeconds());
+        	document.getElementById("time").innerHTML ="Time: " + time + " seconds";
 
+        }
     };
 
     game.state.add('Game', Pacman, true);
